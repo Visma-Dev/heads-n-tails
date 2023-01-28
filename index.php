@@ -10,6 +10,25 @@ class Gambler {
         $this->name = $name; // $this это локальная переменная, которая отсылает к текущему объекту
         $this->coins = $coins;
     }
+
+    // метод очка :/
+    public function point(Gambler $gambler)
+    {
+        $this->coins++;
+        $gambler->coins--;
+    }
+
+    //метод банкротства
+    public function bankrupt()
+    {
+        return $this->coins == 0;
+    }
+
+    // метод банка
+    public function bank()
+    {
+        return $this->coins;
+    }
 }
 
 class Game {
@@ -25,23 +44,34 @@ class Game {
         $this->gambler2 = $gambler2;
     }
 
-    // Метод
+    public function flip(): string // возвращаемый тип данных (жесткая типизация omg)
+    {
+        return rand(0, 1) ? "орел" : "решка";
+    }
+
     public function start()
+    {
+        echo <<<START
+            THE GAME BEGINS: \n
+        START;
+
+        $this->play();
+    }
+
+    // Метод
+    public function play()
     {
         // ∞ цикл
         while (true) {
-            $flip = rand(0, 1) ? "орел" : "решка";
 
             //Орел - П1 получает монету, П2 теряет
-            if ($flip == "орел") {
-                $this->gambler1->coins++; //т.е. интерпретатор видит это как $game->...
-                $this->gambler2->coins--;
+            if ($this->flip() == "орел") {
+                $this->gambler1->point($this->gambler2); //т.е. интерпретатор видит это как $game->gambler1...
             } else { //Решка - П2 получает монету, П1 теряет
-                $this->gambler1->coins--;
-                $this->gambler2->coins++;
+                $this->gambler2->point($this->gambler1);
             }
             //Как только один из игроков потеряет все монеты - GAME OVER.
-            if ($this->gambler1->coins == 0 || $this->gambler2->coins == 0) {
+            if ($this->gambler1->bankrupt() || $this->gambler2->bankrupt()) {
                 return $this->end();
             }
 
@@ -49,13 +79,9 @@ class Game {
         }
     }
     // победителем становится игрок, с бОльшим кол-вом монет
-    public function winner()
+    public function winner(): Gambler
     {
-        if ($this->gambler1->coins > $this->gambler2->coins) {
-            return $this->gambler1;
-        }else{
-            return $this->gambler2;
-        }
+        return $this->gambler1->bank() > $this->gambler2->bank() ? $this->gambler1 : $this->gambler2;
     }
 
     public function end()
@@ -63,7 +89,7 @@ class Game {
         // <<<Heredoc - удобный формат для работы с большим кол-вом текста
         echo <<<GAMEOVER
         ////////////////////////
-            GAME OVER
+            GAME OVER:
             
             The Winner is ... {$this->winner()->name}
             
