@@ -11,7 +11,7 @@ class Gambler {
         $this->coins = $coins;
     }
 
-    // метод очка :/
+    // метод выполнения действий, в случае победы в одном броске
     public function point(Gambler $gambler)
     {
         $this->coins++;
@@ -24,10 +24,16 @@ class Gambler {
         return $this->coins == 0;
     }
 
-    // метод банка
+    // метод вычисления банка игроков
     public function bank()
     {
         return $this->coins;
+    }
+
+    // метод вычисления шансов на победу
+    public function odds(Gambler $gambler)
+    {
+        return round($this->bank() / ($this->bank() + $gambler->bank()), 2) * 100 . '%';
     }
 }
 
@@ -52,7 +58,11 @@ class Game {
     public function start()
     {
         echo <<<START
-            THE GAME BEGINS: \n
+        ////////////////////////////////////////////
+            THE GAME BEGINS:
+            
+            {$this->gambler1->name}'s odds: {$this->gambler1->odds($this->gambler2)}
+            {$this->gambler2->name}'s odds: {$this->gambler2->odds($this->gambler1)}\n
         START;
 
         $this->play();
@@ -88,21 +98,20 @@ class Game {
     {
         // <<<Heredoc - удобный формат для работы с большим кол-вом текста
         echo <<<GAMEOVER
-        ////////////////////////
+        ////////////////
             GAME OVER:
             
             The Winner is ... {$this->winner()->name}
-            
             flips quantity: {$this->flips}
-        ////////////////////////    
+        ////////////////////////////////////////////    
         GAMEOVER;
     }
 }
 
-// объект
+// объект класса Game, который принимает в себя, как атрибуты - 2 объекта класса Gambler
 $game = new Game (
-    new Gambler("Jack", 100), //задаем значения свойствам, которые принимает конструктор класса Gambler
-    new Gambler("Dave", 100)
+    new Gambler("Jack", 100), // объект класса Gambler
+    new Gambler("Dave", 100)//задаем значения свойствам, которые принимает конструктор класса Gambler
 );
 
 $game->start();
